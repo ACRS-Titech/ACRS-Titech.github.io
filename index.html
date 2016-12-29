@@ -186,16 +186,62 @@ $(function () {
       });
     });
 
-    $.getJSON("./data/shop.geojson", function(data) {
-    var geojson = L.geoJson(data, {
-        onEachFeature: function (feature, layer) {
-            layer.bindPopup(feature.properties.name);
-        }
+
+  //お店のlayer
+  $.getJSON( './data/shop.geojson', function ( data ) {
+    var icon = L.icon({
+      iconUrl: './icon/insyoukuten.png',
+      iconSize: [25, 41],
+      iconAnchor: [13, 40],
+      popupAnchor: [0, -32]
+    });
+    var geojson = L.geoJson( data, {
+          onEachFeature: function ( feature, layer ) {
+            //if ( feature.properties && feature.properties.popupContent ) {
+                layer.bindPopup( '<b>' + feature.properties.name + '</b><br />' + feature.properties.address );
+            //}
+          }
+        , pointToLayer: function( feature, latlng ) {
+            var icn = icon; // デフォルトアイコンを指定
+            //if ( feature.properties && feature.properties.category === '1' ) { //  "category": "1" の場合。 "category": 1 の場合 === 1 とする
+                //icn = redIcon;
+            //}
+            return L.marker( latlng, { icon: icn });
+          }
     });
     geojson.addTo(map);
-});
+  });
+  //お店のlayer
+  $.getJSON( './data/tenpo.geojson', function ( data ) {
+    var icon = L.icon({
+      iconUrl: './icon/ryohanten.png',
+      iconSize: [25, 41],
+      iconAnchor: [13, 40],
+      popupAnchor: [0, -32]
+    });
+    var geojson = L.geoJson( data, {
+          onEachFeature: function ( feature, layer ) {
+            //if ( feature.properties && feature.properties.popupContent ) {
+                layer.bindPopup( '<b>' + feature.properties.name + '</b><br />' + feature.properties.address );
+            //}
+          }
+        , pointToLayer: function( feature, latlng ) {
+            var icn = icon; // デフォルトアイコンを指定
+            //if ( feature.properties && feature.properties.category === '1' ) { //  "category": "1" の場合。 "category": 1 の場合 === 1 とする
+                //icn = redIcon;
+            //}
+            return L.marker( latlng, { icon: icn });
+          }
+    });
+    geojson.addTo(map);
+  });
+
+
+
   }
+
   initMap();
+
 });
 </script>
   </body>
