@@ -198,7 +198,7 @@ $(function () {
     var geojson = L.geoJson( data, {
           onEachFeature: function ( feature, layer ) {
             //if ( feature.properties && feature.properties.popupContent ) {
-                layer.bindPopup( '<b>' + feature.properties.name + '</b><br />' + feature.properties.address );
+                layer.bindPopup( '<b>' + feature.properties.Tel + '</b><br />' + feature.properties.title );
             //}
           }
         , pointToLayer: function( feature, latlng ) {
@@ -222,7 +222,7 @@ $(function () {
     var geojson = L.geoJson( data, {
           onEachFeature: function ( feature, layer ) {
             //if ( feature.properties && feature.properties.popupContent ) {
-                layer.bindPopup( '<b>' + feature.properties.name + '</b><br />' + feature.properties.address );
+                layer.bindPopup( '<b>' + feature.properties.Tel + '</b><br />' + feature.properties.title );
             //}
           }
         , pointToLayer: function( feature, latlng ) {
