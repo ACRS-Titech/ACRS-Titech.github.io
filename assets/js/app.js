@@ -87,7 +87,7 @@ function sidebarClick(id) {
     map.invalidateSize();
   }
 }
-
+// ToDo アイコンを対応
 function syncSidebar() {
   /* Empty sidebar features */
   $("#feature-list tbody").empty();
@@ -104,6 +104,20 @@ function syncSidebar() {
     if (map.hasLayer(museumLayer)) {
       if (map.getBounds().contains(layer.getLatLng())) {
         $("#feature-list tbody").append('<tr class="feature-row" id="' + L.stamp(layer) + '" lat="' + layer.getLatLng().lat + '" lng="' + layer.getLatLng().lng + '"><td style="vertical-align: middle;"><img width="16" height="18" src="assets/img/museum.png"></td><td class="feature-name">' + layer.feature.properties.NAME + '</td><td style="vertical-align: middle;"><i class="fa fa-chevron-right pull-right"></i></td></tr>');
+      }
+    }
+  });
+  nosanbutsu.eachLayer(function (layer) {
+    if (map.hasLayer(nosanbutsuLayer)) {
+      if (map.getBounds().contains(layer.getLatLng())) {
+        $("#feature-list tbody").append('<tr class="feature-row" id="' + L.stamp(layer) + '" lat="' + layer.getLatLng().lat + '" lng="' + layer.getLatLng().lng + '"><td style="vertical-align: middle;"><img width="16" height="18" src="assets/img/theater.png"></td><td class="feature-name">' + layer.feature.properties.NAME + '</td><td style="vertical-align: middle;"><i class="fa fa-chevron-right pull-right"></i></td></tr>');
+      }
+    }
+  });
+  syokuhinkakou.eachLayer(function (layer) {
+    if (map.hasLayer(syokuhinkakouLayer)) {
+      if (map.getBounds().contains(layer.getLatLng())) {
+        $("#feature-list tbody").append('<tr class="feature-row" id="' + L.stamp(layer) + '" lat="' + layer.getLatLng().lat + '" lng="' + layer.getLatLng().lng + '"><td style="vertical-align: middle;"><img width="16" height="18" src="assets/img/theater.png"></td><td class="feature-name">' + layer.feature.properties.NAME + '</td><td style="vertical-align: middle;"><i class="fa fa-chevron-right pull-right"></i></td></tr>');
       }
     }
   });
@@ -305,6 +319,7 @@ var museums = L.geoJson(null, {
 });
 $.getJSON("data/super.geojson", function (data) {
   museums.addData(data);
+  map.addLayer(museumLayer);
 });
 
 var nosanbutsuLayer = L.geoJson(null);
@@ -336,7 +351,7 @@ var nosanbutsu = L.geoJson(null, {
       theaterSearch.push({
         name: layer.feature.properties.NAME,
         address: layer.feature.properties.ADDRESS1,
-        source: "Theaters",
+        source: "Ryohanten",
         id: L.stamp(layer),
         lat: layer.feature.geometry.coordinates[1],
         lng: layer.feature.geometry.coordinates[0]
@@ -346,7 +361,7 @@ var nosanbutsu = L.geoJson(null, {
 });
 //geojson 読み込み
 $.getJSON("data/tenpo.geojson", function (data) {
-  theaters.addData(data);
+  nosanbutsu.addData(data);
   map.addLayer(nosanbutsuLayer);
 });
 var syokuhinkakouLayer = L.geoJson(null);
@@ -378,7 +393,7 @@ var syokuhinkakou = L.geoJson(null, {
       theaterSearch.push({
         name: layer.feature.properties.NAME,
         address: layer.feature.properties.ADDRESS1,
-        source: "Theaters",
+        source: "Syokuhinkakou",
         id: L.stamp(layer),
         lat: layer.feature.geometry.coordinates[1],
         lng: layer.feature.geometry.coordinates[0]
@@ -388,7 +403,7 @@ var syokuhinkakou = L.geoJson(null, {
 });
 //geojson 読み込み
 $.getJSON("data/fact.geojson", function (data) {
-  theaters.addData(data);
+  syokuhinkakou.addData(data);
   map.addLayer(syokuhinkakouLayer);
 });
 
@@ -410,6 +425,14 @@ map.on("overlayadd", function(e) {
     markerClusters.addLayer(museums);
     syncSidebar();
   }
+  if (e.layer === nosanbutsuLayer) {
+    markerClusters.addLayer(nosanbutsu);
+    syncSidebar();
+  }
+  if (e.layer === syokuhinkakouLayer) {
+    markerClusters.addLayer(syokuhinkakouLayer);
+    syncSidebar();
+  }
 });
 
 map.on("overlayremove", function(e) {
@@ -419,6 +442,14 @@ map.on("overlayremove", function(e) {
   }
   if (e.layer === museumLayer) {
     markerClusters.removeLayer(museums);
+    syncSidebar();
+  }
+  if (e.layer === nosanbutsuLayer) {
+    markerClusters.removeLayer(nosanbutsu);
+    syncSidebar();
+  }
+  if (e.layer === syokuhinkakouLayer) {
+    markerClusters.removeLayer(syokuhinkakou);
     syncSidebar();
   }
 });
@@ -573,6 +604,24 @@ $(document).one("ajaxStop", function () {
     local: museumSearch,
     limit: 10
   });
+  var nosanbutsuBH = new Bloodhound({
+    name: "Museums",
+    datumTokenizer: function (d) {
+      return Bloodhound.tokenizers.whitespace(d.name);
+    },
+    queryTokenizer: Bloodhound.tokenizers.whitespace,
+    local: museumSearch,
+    limit: 10
+  });
+  var syokuhinkakouBH = new Bloodhound({
+    name: "Museums",
+    datumTokenizer: function (d) {
+      return Bloodhound.tokenizers.whitespace(d.name);
+    },
+    queryTokenizer: Bloodhound.tokenizers.whitespace,
+    local: museumSearch,
+    limit: 10
+  });
 
   var geonamesBH = new Bloodhound({
     name: "GeoNames",
@@ -607,6 +656,8 @@ $(document).one("ajaxStop", function () {
   boroughsBH.initialize();
   theatersBH.initialize();
   museumsBH.initialize();
+  nosanbutsuBH.initialize();
+  syokuhinkakouBH.initialize();
   geonamesBH.initialize();
 
   /* instantiate the typeahead UI */
@@ -638,17 +689,17 @@ $(document).one("ajaxStop", function () {
       suggestion: Handlebars.compile(["{{name}}<br>&nbsp;<small>{{address}}</small>"].join(""))
     }
   },{
-    name: "Theaters",
+    name: "Nosanbutsu",
     displayKey: "name",
-    source: theatersBH.ttAdapter(),
+    source: nosanbutsuBH.ttAdapter(),
     templates: {
       header: "<h4 class='typeahead-header'><img src='icon/nosanbutsu.png' width='24' height='28'>&nbsp;Nosanbutsu</h4>",
       suggestion: Handlebars.compile(["{{name}}<br>&nbsp;<small>{{address}}</small>"].join(""))
     }
   }, {
-    name: "Museums",
+    name: "Syokuhinkakou",
     displayKey: "name",
-    source: museumsBH.ttAdapter(),
+    source: syokuhinkakouBH.ttAdapter(),
     templates: {
       header: "<h4 class='typeahead-header'><img src='icon/syokuhinkakou.png' width='24' height='28'>&nbsp;Syokuhinkakou</h4>",
       suggestion: Handlebars.compile(["{{name}}<br>&nbsp;<small>{{address}}</small>"].join(""))
